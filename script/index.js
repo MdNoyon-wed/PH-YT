@@ -1,4 +1,12 @@
 
+function removeActiveClass (){
+  const activeButtons = document.getElementsByClassName("active");
+  for(let btn of activeButtons){
+    btn.classList.remove("active");
+  }
+  console.log(activeButtons)
+
+}
 function loadCategories(){
   //1- fetch
 fetch("https://openapi.programming-hero.com/api/phero-tube/categories")
@@ -13,9 +21,15 @@ fetch("https://openapi.programming-hero.com/api/phero-tube/categories")
 function loadVideo (){
   fetch("https://openapi.programming-hero.com/api/phero-tube/videos")
   .then(response => response.json())
-  .then(data => displayVideo(data.videos))
-}
+  .then(data =>{
 
+    removeActiveClass();
+
+   document.getElementById("btn-all").classList.add("active");
+    displayVideo(data.videos)
+  })
+}
+                              // 1001
 const loadCategoriesVideos = (id) => {
   
   const url =`
@@ -24,8 +38,40 @@ const loadCategoriesVideos = (id) => {
 
   fetch(url)
   .then(res => res.json())
-  .then((date)=> displayVideo(date.category))
+  .then((data)=>{
+
+    removeActiveClass();
+
+    const clickButton = document.getElementById(`btn-${id}`);
+    clickButton.classList.add("active");
+    console.log(clickButton)
+    displayVideo(data.category)
+  })
+ 
+  
+    
 }
+
+const loadVideoDetails =(videoId)=>{
+  const url =`https://openapi.programming-hero.com/api/phero-tube/videos/${videoId}`;
+  fetch(url)
+  .then(res=>res.json())
+  .then(data =>displayVideoDetails(data.video))
+   
+  
+  
+};
+
+const displayVideoDetails=(video)=>{
+  console.log(video)
+  document.getElementById("video_details").showModal();
+
+  const detailsContainer = document.getElementById("details_Container");
+
+  detailsContainer.innerHTML=`
+  <h2>${video.title}</h2>`
+};
+ 
 
 
 
@@ -48,6 +94,7 @@ const loadCategoriesVideos = (id) => {
 //     },
 //     "description": "Ethan Clark's 'Colors of the Wind' is a vibrant musical exploration that captivates listeners with its rich, expressive melodies and uplifting rhythm. With 233K views, this song is a celebration of nature's beauty and human connection, offering a soothing and enriching experience for fans of heartfelt, nature-inspired music."
 // }
+
   // "category_id": "1001",
   // "category": "Music"
 }
@@ -64,7 +111,8 @@ for(let cat of categories){
 // create Element
 const categortDiv =document.createElement("div");
 categortDiv.innerHTML=`
-  <button onclick="loadCategoriesVideos(${cat.category_id})" class="btn btn-sm hover:bg-red-600 hover:text-white">${cat.category}</button>
+  <button id="btn-${cat.category_id}" onclick="loadCategoriesVideos(${cat.category_id})
+  " class="btn btn-sm hover:bg-red-600 hover:text-white">${cat.category}</button>
  `;
 
 // append the Element
@@ -80,8 +128,19 @@ const displayVideo = (videos) => {
   const videoContainer = document.getElementById("video-container");
   videoContainer.innerHTML="";
 
+  if(videos.length==0){
+    videoContainer.innerHTML=`
+     <div class="col-span-full flex flex-col text-center justify-center items-center py-20">
+      <img class="w-[120px]" src="img/Icon.png" alt="">
+      <h2 class="text-3xl font-bold ">Oops!! Sorry, There is no content here</h2>
+    </div>
+    
+    `;
+    return;
+  }
+
   videos.forEach(video=>{
-    //  console.log(video)
+      console.log(video)
     const videoCard = document.createElement("div")
      videoCard .innerHTML = `
      <div class="card bg-base-100 ">
@@ -109,6 +168,11 @@ const displayVideo = (videos) => {
         </div>
 
         </div>
+
+        <div>
+        <button onclick=loadVideoDetails('${video.video_id}') class="btn btn-block">Wide</button>
+        </div>
+
       </div>
      
     `
